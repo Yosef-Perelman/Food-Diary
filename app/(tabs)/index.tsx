@@ -27,7 +27,22 @@ interface DayData {
   moodNote: string;
 }
 
-const FoodEntry = ({ item, onDelete, onEdit }) => (
+interface FoodEntryProps {
+  item: {
+    id: string;
+    name: string;
+    time: number;
+  };
+  onDelete: (id: string) => void;
+  onEdit: (item: { id: string; name: string; time: number }) => void;
+}
+
+interface MoodSelectorProps {
+  value: number;
+  onChange: (value: number) => void;
+}
+
+const FoodEntry: React.FC<FoodEntryProps> = ({ item, onDelete, onEdit }) => (
   <View style={styles.foodCard}>
     <View style={styles.foodCardContent}>
       <View style={styles.foodInfo}>
@@ -60,7 +75,7 @@ const MOOD_OPTIONS = Array.from({ length: 10 }, (_, i) => ({
   value: i + 1,
 }));
 
-const MoodSelector = ({ value, onChange }) => {
+const MoodSelector: React.FC<MoodSelectorProps> = ({ value, onChange }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   return (
@@ -123,7 +138,11 @@ export default function DailyLog() {
   const [workoutNote, setWorkoutNote] = useState('');
   const [moodRating, setMoodRating] = useState(5);
   const [moodNote, setMoodNote] = useState('');
-  const [foodEntries, setFoodEntries] = useState([]);
+  const [foodEntries, setFoodEntries] = useState<Array<{
+    id: string;
+    name: string;
+    time: number;
+  }>>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
 
@@ -186,12 +205,12 @@ export default function DailyLog() {
     setFoodEntries(current => current.filter(entry => entry.id !== id));
   }, []);
 
-  const handleEditFood = useCallback((entry) => {
+  const handleEditFood = useCallback((entry: { id: string; name: string; time: number }) => {
     setEditingEntry(entry);
     setModalVisible(true);
   }, []);
 
-  const handleSaveEntry = useCallback((entry) => {
+  const handleSaveEntry = useCallback((entry: { name: string; time: number }) => {
     const entryTime = new Date(entry.time);
     const adjustedTime = new Date(selectedDate);
     adjustedTime.setHours(entryTime.getHours());
@@ -492,7 +511,7 @@ const styles = StyleSheet.create({
   checkboxInner: {
     width: 12,
     height: 12,
-    borderRadius: 6,
+    borderRadius: 12,
     backgroundColor: 'transparent',
   },
   checkboxChecked: {
