@@ -7,8 +7,22 @@ import {
   Pressable,
   TextInput,
   TouchableOpacity,
+  I18nManager,
 } from 'react-native';
 import { Clock } from 'lucide-react-native';
+
+// Hebrew translations
+const translations = {
+  addEntry: 'הוסף מאכל',
+  editEntry: 'ערוך מאכל',
+  foodName: 'שם המאכל',
+  enterFoodName: 'הכנס שם מאכל',
+  customTime: 'בחר שעה',
+  cancel: 'ביטול',
+  save: 'שמור',
+  pleaseEnterFood: 'אנא הכנס שם מאכל',
+  pleaseEnterValidTime: 'אנא הכנס שעה תקינה',
+};
 
 interface AddEntryModalProps {
   visible: boolean;
@@ -94,11 +108,11 @@ export default function AddEntryModal({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>
-            {initialEntry ? 'Edit Food Entry' : 'Add Food Entry'}
+            {initialEntry ? translations.editEntry : translations.addEntry}
           </Text>
           
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Food Name</Text>
+            <Text style={styles.label}>{translations.foodName}</Text>
             <TextInput
               style={[styles.input, error && styles.inputError]}
               value={name}
@@ -106,8 +120,9 @@ export default function AddEntryModal({
                 setName(text);
                 setError('');
               }}
-              placeholder="Enter food name"
+              placeholder={translations.enterFoodName}
               autoFocus
+              textAlign="right"
             />
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
           </View>
@@ -116,19 +131,19 @@ export default function AddEntryModal({
             <TouchableOpacity
               style={styles.timeToggle}
               onPress={() => setUseCustomTime(!useCustomTime)}>
-              <Clock size={20} color={useCustomTime ? '#2196F3' : '#757575'} />
               <Text style={[
                 styles.timeToggleText,
                 useCustomTime && styles.timeToggleTextActive
               ]}>
-                Set custom time
+                {translations.customTime}
               </Text>
+              <Clock size={20} color={useCustomTime ? '#2196F3' : '#757575'} />
             </TouchableOpacity>
 
             {useCustomTime && (
               <View style={styles.timeInputContainer}>
                 <View style={styles.timeInputWrapper}>
-                  <TextInput
+                <TextInput
                     style={styles.timeInput}
                     value={hours}
                     onChangeText={(text) => handleTimeChange(text, true)}
@@ -137,6 +152,7 @@ export default function AddEntryModal({
                     placeholder="HH"
                   />
                   <Text style={styles.timeSeparator}>:</Text>
+                  
                   <TextInput
                     style={styles.timeInput}
                     value={minutes}
@@ -152,15 +168,6 @@ export default function AddEntryModal({
 
           <View style={styles.buttonContainer}>
             <Pressable
-              onPress={onClose}
-              style={({ pressed }) => [
-                styles.button,
-                styles.cancelButton,
-                pressed && styles.buttonPressed,
-              ]}>
-              <Text style={styles.buttonText}>Cancel</Text>
-            </Pressable>
-            <Pressable
               onPress={handleSave}
               style={({ pressed }) => [
                 styles.button,
@@ -168,8 +175,17 @@ export default function AddEntryModal({
                 pressed && styles.buttonPressed,
               ]}>
               <Text style={[styles.buttonText, styles.saveButtonText]}>
-                Save
+                {translations.save}
               </Text>
+            </Pressable>
+            <Pressable
+              onPress={onClose}
+              style={({ pressed }) => [
+                styles.button,
+                styles.cancelButton,
+                pressed && styles.buttonPressed,
+              ]}>
+              <Text style={styles.buttonText}>{translations.cancel}</Text>
             </Pressable>
           </View>
         </View>
@@ -195,6 +211,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginBottom: 24,
     color: '#000000',
+    textAlign: 'right',
   },
   inputContainer: {
     marginBottom: 24,
@@ -203,6 +220,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#757575',
     marginBottom: 8,
+    textAlign: 'right',
   },
   input: {
     borderWidth: 1,
@@ -211,6 +229,7 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     backgroundColor: '#FAFAFA',
+    textAlign: 'right',
   },
   inputError: {
     borderColor: '#FF5252',
@@ -219,19 +238,20 @@ const styles = StyleSheet.create({
     color: '#FF5252',
     fontSize: 12,
     marginTop: 4,
+    textAlign: 'right',
   },
   timeSection: {
     marginBottom: 24,
   },
   timeToggle: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     padding: 12,
     backgroundColor: '#F5F5F5',
     borderRadius: 8,
   },
   timeToggleText: {
-    marginLeft: 8,
+    marginRight: 8,
     fontSize: 16,
     color: '#757575',
   },
@@ -264,8 +284,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: 'row-reverse',
+    justifyContent: 'flex-start',
+    gap: 8,
   },
   button: {
     paddingVertical: 12,

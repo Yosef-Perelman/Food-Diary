@@ -38,6 +38,28 @@ interface DailyMoodData {
   score: number;
 }
 
+// Hebrew translations
+const translations = {
+  statistics: 'סטטיסטיקה',
+  monthlyMood: 'ממוצע תחושה חודשית',
+  average: 'ממוצע',
+  trending: {
+    up: 'במגמת עלייה',
+    down: 'במגמת ירידה',
+    same: 'ללא שינוי',
+    null: 'ללא נתונים',
+  },
+  comparedTo: 'בהשוואה לחודש הקודם',
+  foodMoodCorrelation: 'השפעות מזון על מצב הרוח',
+  search: 'חיפוש מאכלים...',
+  sortBy: {
+    name: 'לפי שם',
+    score: 'לפי ציון',
+  },
+  occurrences: 'פעמים',
+  noData: 'אין נתונים להצגה',
+};
+
 export default function Stats() {
   const [loading, setLoading] = useState(true);
   const [currentAverage, setCurrentAverage] = useState<number | null>(null);
@@ -306,11 +328,11 @@ export default function Stats() {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.title}>Statistics</Text>
+          <Text style={styles.title}>{translations.statistics}</Text>
         </View>
         
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Monthly Mood Analysis</Text>
+          <Text style={styles.cardTitle}>{translations.monthlyMood}</Text>
           
           {loading ? (
             <ActivityIndicator size="large" color="#007AFF" />
@@ -320,21 +342,18 @@ export default function Stats() {
                 <Text style={styles.scoreNumber}>
                   {currentAverage !== null ? currentAverage.toFixed(1) : '-'}
                 </Text>
-                <Text style={styles.scoreLabel}>Average Mood</Text>
               </View>
 
               <View style={styles.trendContainer}>
                 {renderTrendIcon()}
                 <Text style={styles.trendText}>
-                  {trend === 'up' ? 'Improving' :
-                   trend === 'down' ? 'Declining' :
-                   trend === 'same' ? 'Stable' : 'No previous data'}
+                  {translations.trending[trend]}
                 </Text>
               </View>
 
               <Text style={styles.comparisonText}>
                 {previousAverage !== null
-                  ? `Previous month average: ${previousAverage.toFixed(1)}`
+                  ? `{translations.comparedTo} {previousAverage.toFixed(1)}`
                   : 'No data from previous month'}
               </Text>
             </>
@@ -343,20 +362,9 @@ export default function Stats() {
         
         <View style={styles.card}>
           <View style={styles.chartHeader}>
-            <Text style={styles.cardTitle}>Mood Score Trend</Text>
+            <Text style={styles.cardTitle}>מגמות בתחושה</Text>
             <View style={styles.monthSelector}>
-              <Pressable
-                onPress={() => handleMonthChange('prev')}
-                style={({ pressed }) => [
-                  styles.monthButton,
-                  pressed && styles.buttonPressed,
-                ]}>
-                <ChevronLeft size={20} color="#007AFF" />
-              </Pressable>
-              <Text style={styles.monthText}>
-                {format(selectedMonth, 'MMMM yyyy')}
-              </Text>
-              <Pressable
+            <Pressable
                 onPress={() => handleMonthChange('next')}
                 disabled={isCurrentMonth}
                 style={({ pressed }) => [
@@ -365,6 +373,18 @@ export default function Stats() {
                   pressed && styles.buttonPressed,
                 ]}>
                 <ChevronRight size={20} color={isCurrentMonth ? '#CCCCCC' : '#007AFF'} />
+              </Pressable>
+              <Text style={styles.monthText}>
+                {format(selectedMonth, 'MMMM yyyy')}
+              </Text>
+              
+              <Pressable
+                onPress={() => handleMonthChange('prev')}
+                style={({ pressed }) => [
+                  styles.monthButton,
+                  pressed && styles.buttonPressed,
+                ]}>
+                <ChevronLeft size={20} color="#007AFF" />
               </Pressable>
             </View>
           </View>
@@ -395,20 +415,20 @@ export default function Stats() {
             </View>
           ) : (
             <Text style={styles.noDataText}>
-              No mood data available for {format(selectedMonth, 'MMMM yyyy')}
+              {translations.noData} {format(selectedMonth, 'MMMM yyyy')}
             </Text>
           )}
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Food-Mood Analysis</Text>
+          <Text style={styles.cardTitle}>{translations.foodMoodCorrelation}</Text>
           
           <View style={styles.searchContainer}>
             <View style={styles.searchInputContainer}>
               <Search size={20} color="#666" style={styles.searchIcon} />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search foods..."
+                placeholder={translations.search}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
               />
@@ -435,7 +455,7 @@ export default function Stats() {
                     styles.sortButtonText,
                     sortBy === 'score' && styles.sortButtonTextActive,
                   ]}>
-                  By Score
+                  {translations.sortBy.score}
                 </Text>
               </Pressable>
               <Pressable
@@ -449,7 +469,7 @@ export default function Stats() {
                     styles.sortButtonText,
                     sortBy === 'name' && styles.sortButtonTextActive,
                   ]}>
-                  By Name
+                  {translations.sortBy.name}
                 </Text>
               </Pressable>
             </View>
@@ -514,6 +534,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#000',
+    textAlign: 'right',
   },
   card: {
     backgroundColor: '#FFF',
@@ -532,13 +553,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
     marginBottom: 20,
+    textAlign: 'right',
   },
   chartHeader: {
     flexDirection: 'column',
     marginBottom: 20,
   },
   monthSelector: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
@@ -577,7 +599,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   trendContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -585,7 +607,7 @@ const styles = StyleSheet.create({
   trendText: {
     fontSize: 15,
     fontWeight: '500',
-    marginLeft: 8,
+    marginRight: 8,
   },
   comparisonText: {
     fontSize: 13,
@@ -610,7 +632,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   searchInputContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     backgroundColor: '#F0F0F0',
     borderRadius: 10,
@@ -625,6 +647,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000',
     padding: 4,
+    textAlign: 'right',
   },
   clearButton: {
     padding: 4,
@@ -633,7 +656,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   sortButtons: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     gap: 8,
   },
   sortButton: {
@@ -659,7 +682,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   foodItem: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#F8F9FA',
@@ -668,15 +691,18 @@ const styles = StyleSheet.create({
   },
   foodInfo: {
     flex: 1,
+    alignItems: 'flex-end',
   },
   foodName: {
     fontSize: 16,
     fontWeight: '500',
     color: '#000',
+    textAlign: 'right',
   },
   foodOccurrences: {
     fontSize: 13,
     color: '#666',
+    textAlign: 'right',
   },
   scoreContainer: {
     backgroundColor: '#FFF',

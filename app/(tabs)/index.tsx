@@ -7,6 +7,7 @@ import {
   Pressable,
   TextInput,
   Modal,
+  I18nManager,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react-native';
@@ -14,6 +15,26 @@ import { format, addDays, subDays } from 'date-fns';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AddEntryModal from '../../components/AddEntryModal';
 import { useRouter } from 'expo-router';
+
+// Force RTL layout
+I18nManager.allowRTL(true);
+I18nManager.forceRTL(true);
+
+// Hebrew translations
+const translations = {
+  dailyLog: 'יומן מזון',
+  foodLog: 'רשימת מאכלים',
+  addFood: 'הוסף מאכל',
+  editFood: 'ערוך מאכל',
+  delete: 'מחק',
+  edit: 'ערוך',
+  workout: 'אימון',
+  workoutDone: 'האם התאמנת היום?',
+  workoutNote: 'תיאור',
+  mood: 'איך המרגש?',
+  moodRating: 'דירוג מצב רוח',
+  moodNote: 'תיאור',
+};
 
 interface DayData {
   foodEntries: Array<{
@@ -46,8 +67,8 @@ const FoodEntry: React.FC<FoodEntryProps> = ({ item, onDelete, onEdit }) => (
   <View style={styles.foodCard}>
     <View style={styles.foodCardContent}>
       <View style={styles.foodInfo}>
-        <Text style={styles.foodTime}>{format(new Date(item.time), 'HH:mm')}</Text>
         <Text style={styles.foodName}>{item.name}</Text>
+        <Text style={styles.foodTime}>{format(new Date(item.time), 'HH:mm')}</Text>
       </View>
       <View style={styles.foodActions}>
         <Pressable
@@ -56,7 +77,7 @@ const FoodEntry: React.FC<FoodEntryProps> = ({ item, onDelete, onEdit }) => (
             styles.actionButton,
             pressed && styles.buttonPressed,
           ]}>
-          <Text style={styles.editButtonText}>Edit</Text>
+          <Text style={styles.editButtonText}>{translations.edit}</Text>
         </Pressable>
         <Pressable
           onPress={() => onDelete(item.id)}
@@ -64,7 +85,7 @@ const FoodEntry: React.FC<FoodEntryProps> = ({ item, onDelete, onEdit }) => (
             styles.actionButton,
             pressed && styles.buttonPressed,
           ]}>
-          <Text style={styles.deleteButtonText}>Delete</Text>
+          <Text style={styles.deleteButtonText}>{translations.delete}</Text>
         </Pressable>
       </View>
     </View>
@@ -254,9 +275,21 @@ export default function DailyLog() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Food Diary</Text>
+          <Text style={styles.title}>{translations.dailyLog}</Text>
         </View>
         <View style={styles.dateContainer}>
+        <Pressable
+            onPress={() => handleDateChange(1)}
+            style={({ pressed }) => [
+              styles.dateButton,
+              pressed && styles.buttonPressed,
+            ]}>
+            <ChevronRight size={24} color="#007AFF" />
+          </Pressable>
+          
+          <Text style={styles.dateText}>
+            {format(selectedDate, 'dd MMM yyyy')}
+          </Text>
           <Pressable
             onPress={() => handleDateChange(-1)}
             style={({ pressed }) => [
@@ -265,24 +298,12 @@ export default function DailyLog() {
             ]}>
             <ChevronLeft size={24} color="#007AFF" />
           </Pressable>
-          <Text style={styles.dateText}>
-            {format(selectedDate, 'dd MMM yyyy')}
-          </Text>
-          <Pressable
-            onPress={() => handleDateChange(1)}
-            style={({ pressed }) => [
-              styles.dateButton,
-              pressed && styles.buttonPressed,
-            ]}>
-            <ChevronRight size={24} color="#007AFF" />
-          </Pressable>
         </View>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Food Log</Text>
             <Pressable
               style={({ pressed }) => [
                 styles.addButton,
@@ -291,6 +312,7 @@ export default function DailyLog() {
               onPress={() => setModalVisible(true)}>
               <Plus size={18} color="#fff" />
             </Pressable>
+            <Text style={styles.sectionTitle}>{translations.foodLog}</Text>
           </View>
           <View style={styles.foodList}>
             {foodEntries.map(entry => (
@@ -306,7 +328,7 @@ export default function DailyLog() {
 
         <View style={[styles.section, styles.compactSection]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Workout</Text>
+            
             <Pressable
               onPress={() => setWorkoutDone(!workoutDone)}
               style={styles.checkbox}>
@@ -317,11 +339,12 @@ export default function DailyLog() {
                 ]}
               />
             </Pressable>
+            <Text style={styles.sectionTitle}>{translations.workout}</Text>
           </View>
           {workoutDone && (
             <TextInput
               style={styles.workoutNote}
-              placeholder="Add workout details..."
+              placeholder={translations.workoutNote}
               value={workoutNote}
               onChangeText={setWorkoutNote}
               multiline
@@ -333,12 +356,12 @@ export default function DailyLog() {
         <View style={[styles.section, styles.compactSection]}>
           <View style={styles.moodContainer}>
             <View style={styles.moodRow}>
-              <Text style={styles.sectionTitle}>Mood</Text>
+              <Text style={styles.sectionTitle}>{translations.mood}</Text>
               <MoodSelector value={moodRating} onChange={handleMoodChange} />
             </View>
             <TextInput
               style={styles.moodNote}
-              placeholder="How are you feeling today?"
+              placeholder={translations.moodNote}
               value={moodNote}
               onChangeText={setMoodNote}
               multiline
@@ -374,6 +397,7 @@ const styles = StyleSheet.create({
   titleContainer: {
     paddingHorizontal: 20,
     paddingBottom: 12,
+    alignItems: 'flex-end',
   },
   title: {
     fontSize: 28,
@@ -381,7 +405,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   dateContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
@@ -457,13 +481,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   foodCardContent: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 12,
   },
   foodInfo: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     flex: 1,
   },
@@ -471,8 +495,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     color: '#000',
-    marginLeft: 12,
+    marginRight: 12,
     flex: 1,
+    textAlign: 'right',
   },
   foodTime: {
     fontSize: 13,
@@ -480,7 +505,7 @@ const styles = StyleSheet.create({
     minWidth: 45,
   },
   foodActions: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     gap: 8,
   },
   actionButton: {
@@ -529,7 +554,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   moodRow: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 8,
